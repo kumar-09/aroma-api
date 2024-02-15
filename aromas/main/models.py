@@ -10,7 +10,7 @@ class users(models.Model):
 class menu(models.Model):
     food_id = models.CharField(primary_key=True, max_length=15)
     name = models.CharField(max_length=50)
-    price = models.IntegerField()
+    price = models.PositiveIntegerField()
     image = models.ImageField(upload_to='image/')
 
 class data(models.Model):
@@ -18,3 +18,10 @@ class data(models.Model):
     cart_id = models.CharField(max_length=30)
     food_id = models.CharField(max_length=50)
     quantity = models.IntegerField(validators=[MinValueValidator(0),MaxValueValidator(5)])
+
+class session(models.Model):
+    userid = models.ForeignKey(users, on_delete=models.CASCADE)
+    last_activity=models.DateTimeField(auto_now_add=True)
+    
+
+
