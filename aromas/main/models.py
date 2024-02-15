@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Create your models here.
 
@@ -9,4 +10,6 @@ class users(models.Model):
 
 class data(models.Model):
     userid = models.ForeignKey(users, on_delete=models.CASCADE)
+    cart_id = models.CharField(max_length=30)
     food_id = models.CharField(max_length=50)
+    quantity = models.IntegerField(validators=[MinValueValidator(0),MaxValueValidator(5)])
