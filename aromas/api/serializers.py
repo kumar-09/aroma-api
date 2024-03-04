@@ -16,10 +16,6 @@ class userSerializer(serializers.ModelSerializer):
     
 class menuSerializer(serializers.ModelSerializer):
 
-    # food_id = serializers.PrimaryKeyRelatedField()
-    # name = serializers.CharField()
-    # price = serializers.IntegerField()
-    # image = serializers.ImageField()
 
     class Meta:
         model = menu
