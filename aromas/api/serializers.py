@@ -26,7 +26,3 @@ class menuSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
        
-
-
-
-        fields = "__all__"
