@@ -3,12 +3,7 @@ from main.models import users
 from main.models import menu
 
 
-class userSerializer(serializers.Serializer):
-    #id = serializers.IntegerField(read_only=True)
-    userid = serializers.CharField()
-    name = serializers.CharField()
-    pswd = serializers.CharField()
-
+class userSerializer(serializers.ModelSerializer):
     class Meta:
         model = users
         fields = ('userid', 'name', 'pswd')
@@ -33,3 +28,5 @@ class menuSerializer(serializers.ModelSerializer):
        
 
 
+
+        fields = "__all__"
