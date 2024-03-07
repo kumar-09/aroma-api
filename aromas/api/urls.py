@@ -4,5 +4,6 @@ from . import views
 urlpatterns = [
     path('menu/',views.getmenu, name='Menu'),
     path('register/',views.register),
+    path('menu/<str:pk>/',views.Category, name='Category')
 ]
 

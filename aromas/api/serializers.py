@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from main.models import users
-from main.models import menu
+from main.models import menu,category
 
 
 class userSerializer(serializers.ModelSerializer):
@@ -26,3 +26,7 @@ class menuSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
        
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model=category
+        fields ='__all__'
