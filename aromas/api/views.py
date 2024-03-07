@@ -25,7 +25,16 @@ def getmenu(request):
     return Response(serializer.data)
 
 @api_view(['GET'])
-def Category(request , pk):
-    Menulist=category.objects.get(food_id=pk)    
-    serializer = CategorySerializer(Menulist , many=False)
-    return Response(serializer.data)
+def Category(request , type):
+    # itemlist=category.objects.filter(Type=type)    
+    # serializer = CategorySerializer(itemlist , many=True)
+    Menulist = menu.objects.filter(food_id__Type=type)
+    serializer1 = menuSerializer(Menulist ,many=True)
+
+    # data={
+    #     # 'categories':serializer.data,
+    #     'items':serializer1.data
+    # }
+    return Response(serializer1.data)
+
+

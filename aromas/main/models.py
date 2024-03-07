@@ -28,9 +28,9 @@ class data(models.Model):
         verbose_name_plural = 'data'
 
 class menu(models.Model):
-    food_id = models.ForeignKey(category, on_delete=models.CASCADE)
+    food_id = models.OneToOneField(category, unique=True , on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
-    price = models.IntegerField()
+    price = models.PositiveIntegerField()
     image = models.ImageField(upload_to='image/')
 
     class Meta:
