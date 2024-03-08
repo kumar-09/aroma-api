@@ -2,11 +2,9 @@ from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
-from api.serializers import userSerializer, loginSerializer
-from .serializers import menuSerializer , CategorySerializer
-from main.models import menu,category,data
+from api.serializers import userSerializer, loginSerializer, menuSerializer , CategorySerializer,dataSerializer
+from main.models import menu,category,users,data
+from api.forms import menuaddform
 from django.http import HttpResponse,JsonResponse
 import json
 
@@ -30,12 +28,36 @@ def getmenu(request):
     serializer = menuSerializer(Menulist , many=True)
     return Response(serializer.data)
 
+
+@api_view(['POST'])
+def addFood(request):
+    form= menuaddform(request.POST,request.FILES)
+    if form.is_valid():
+        form.save()
+    return Response({'success': True, 'data': form.data})
+
 @api_view(['GET'])
 def Category(request , type):
     Menulist = menu.objects.filter(food_id__Type=type)
     serializer1 = menuSerializer(Menulist ,many=True)
 
     return Response(serializer1.data)
+
+@api_view(['POST'])
+def additem(request):
+    serializer2=menuSerializer(data=request.data)
+
+    if serializer2.is_valid():
+        serializer2.save()
+    return Response(serializer2.data)
+
+@api_view(['GET'])
+def PreviousOrders(request,pk):
+    OrderUserid=data.objects.filter(userid=pk)
+    serializer3=dataSerializer(OrderUserid , many=True)
+
+    OrderList=data.objects.filter(userid=pk)
+    return Response(serializer3.data)
 
 @api_view(['POST'])
 def Cart(request):
@@ -58,8 +80,6 @@ def categorylist(request, type):
 @api_view(['GET'])
 def login(request):
 
-    permission_class = (IsAuthenticated, )
-    serializer_class = userSerializer
     queryset = get_user_model().objets.all()
     
     serializer = loginSerializer(data=request.data)

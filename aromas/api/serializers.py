@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from main.models import users
-from main.models import menu,category,data
+from main.models import menu,category,data,data
 from django.contrib.auth import get_user_model
 
 
@@ -16,12 +16,20 @@ class menuSerializer(serializers.ModelSerializer):
     class Meta:
         model = menu
         fields = '__all__'
-
        
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model=category
         fields ='__all__'
+
+class dataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=data
+        fields=['cart_id']
+
+
+
+
 
 
 class loginSerializer(serializers.ModelSerializer):
