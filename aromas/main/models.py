@@ -5,15 +5,16 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 class users(models.Model):
     userid = models.CharField(primary_key=True, max_length=15)
-    name = models.CharField(max_length=50, )
-    pswd = models.CharField(max_length=15, )
+    name = models.CharField(max_length=50)
+    pswd = models.CharField(max_length=15)
 
     class Meta:
         verbose_name_plural = 'users'
 
 class category(models.Model):
-    Type = models.CharField(max_length=50, )
+    Type = models.CharField(max_length=50)
     food_id = models.CharField(primary_key=True, max_length=50)
+    image = models.ImageField(upload_to='category/')
 
     class Meta:
         verbose_name_plural = 'category'
@@ -31,7 +32,7 @@ class menu(models.Model):
     food_id = models.OneToOneField(category, unique=True , on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     price = models.PositiveIntegerField()
-    image = models.ImageField(upload_to='image/')
+    image = models.ImageField(upload_to='food/')
 
     class Meta:
         verbose_name_plural = 'menu'
