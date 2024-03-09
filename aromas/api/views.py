@@ -13,7 +13,7 @@ def register(request):
     serializer = userSerializer(data=request.data)
     
     d = {
-        'userid':request.data['userid'],
+        'userid':request.data.get('userid'),
         'name':request.data.get('name'),
     }
     if serializer.is_valid():
@@ -38,24 +38,26 @@ def addFood(request):
 @api_view(['GET'])
 def Category(request , type):
     Menulist = menu.objects.filter(food_id__Type=type)
-    serializer1 = menuSerializer(Menulist ,many=True)
+    serializer = menuSerializer(Menulist ,many=True)
 
-    return Response(serializer1.data)
+    return Response(serializer.data)
 
 @api_view(['POST'])
 def additem(request):
-    serializer2=menuSerializer(data=request.data)
+    serializer=menuSerializer(data=request.data)
 
-    if serializer2.is_valid():
-        serializer2.save()
-    return Response(serializer2.data)
+    if serializer.is_valid():
+        serializer.save()
+    return Response(serializer.data)
 
 @api_view(['GET'])
 def PreviousOrders(request,pk):
+
+    # OrderList=[]
     OrderUserid=data.objects.filter(userid=pk)
     serializer3=dataSerializer(OrderUserid , many=True)
 
-    OrderList=data.objects.filter(userid=pk)
+    # OrderList=data.objects.filter(userid=pk)
     return Response(serializer3.data)
 
 @api_view(['POST'])

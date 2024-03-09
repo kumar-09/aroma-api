@@ -27,11 +27,6 @@ class dataSerializer(serializers.ModelSerializer):
         model=data
         fields=['cart_id']
 
-
-
-
-
-
 class loginSerializer(serializers.ModelSerializer):
     class Meta:
         model = users
