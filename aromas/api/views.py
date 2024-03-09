@@ -13,7 +13,7 @@ def register(request):
     serializer = userSerializer(data=request.data)
     
     d = {
-        'userid':request.data['userid'],
+        'userid':request.data.get('userid'),
         'name':request.data.get('name')
     }
     if serializer.is_valid():
@@ -82,7 +82,7 @@ def categorylist(request, type):
 @api_view(['GET'])
 def login(request):
 
-    queryset = get_user_model().objets.all()
+    queryset = get_user_model().objects.all()
     
     serializer = loginSerializer(data=request.data)
     
