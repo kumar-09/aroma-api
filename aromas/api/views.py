@@ -13,14 +13,13 @@ def register(request):
     serializer = userSerializer(data=request.data)
     
     d = {
-        'userid':request.data['userid'],
-        'name':request.data.get('name')
+        'userid':request.data.get('userid'),
+        'name':request.data.get('name'),
     }
     if serializer.is_valid():
         serializer.save()
         return HttpResponse(json.dumps(d),"Sucessfully created user.", status = 201)
     return HttpResponse(json.dumps(d),"User already exists.", status = 400)
-    # return Response(serializer.data)
     
 @api_view(['GET'])
 def getmenu(request):
@@ -91,16 +90,16 @@ def categorylist(request, type):
     cat = category.objects.all()
     catlist = list()
     typelist = list()
-    #for i in range(len(cat)):
 
 
 @api_view(['GET'])
 def login(request):
-
-    queryset = get_user_model().objets.all()
-    
-    serializer = loginSerializer(data=request.data)
-    
-    if serializer.is_valid():
-        serializer.save()
-    
+    userlist = list(users.objects.all().values())
+    d = {
+        'userid': request.data.get('userid'),
+        'pswd': request.data.get('pswd')
+    }
+    for user in userlist:
+        if user.get('userid') == d['userid'] and user.get('pswd') == d['pswd']:
+            return HttpResponse(json.dumps({'message': 'Successfully logged in'}), status=200)
+    return HttpResponse(json.dumps({'message': 'Invalid credentials'}), status=400)
