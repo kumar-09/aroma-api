@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from api.serializers import userSerializer, loginSerializer, menuSerializer , CategorySerializer,dataSerializer
+from api.serializers import userSerializer, loginSerializer, menuSerializer , CategorySerializer,dataSerializer,ordertestSerializer
 from main.models import menu,category,users,data
 from api.forms import menuaddform
 from django.http import HttpResponse,JsonResponse
@@ -54,12 +54,27 @@ def additem(request):
 @api_view(['GET'])
 def PreviousOrders(request,pk):
 
-    # OrderList=[]
-    OrderUserid=data.objects.filter(userid=pk)
-    serializer3=dataSerializer(OrderUserid , many=True)
+    PrevOrderList=[]
 
-    # OrderList=data.objects.filter(userid=pk)
-    return Response(serializer3.data)
+    OrderUserid=data.objects.filter(userid=pk)
+    serializer1=dataSerializer(OrderUserid , many=True)
+
+    # dict1 = {item['cart_id']: item for item in serializer1.data}
+
+    OrderList=data.objects.filter(userid=pk)
+    serializer2=ordertestSerializer(OrderList ,many=True)
+
+    for OrderCartId in serializer1.data:
+        Cartid=OrderCartId['cart_id']
+        dict2=[]
+    for OrderData in serializer2.data:
+        FoodId=OrderData['food_id']
+        Quantity=OrderData['quantity']
+        dict2.append({FoodId:Quantity})
+
+    
+        PrevOrderList.append({Cartid:dict2})
+    return Response(PrevOrderList)
 
 @api_view(['POST'])
 def Cart(request):

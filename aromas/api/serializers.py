@@ -31,4 +31,11 @@ class loginSerializer(serializers.ModelSerializer):
     class Meta:
         model = users
         fields = ['userid', 'pswd']
+
+class ordertestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=data
+        fields=['food_id','quantity']
+
+        
     
