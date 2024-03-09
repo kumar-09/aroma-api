@@ -37,21 +37,21 @@ def Category(request , type):
     # itemlist=category.objects.filter(Type=type)    
     # serializer = CategorySerializer(itemlist , many=True)
     Menulist = menu.objects.filter(food_id__Type=type)
-    serializer1 = menuSerializer(Menulist ,many=True)
+    serializer = menuSerializer(Menulist ,many=True)
 
     # data={
     #     # 'categories':serializer.data,
     #     'items':serializer1.data
     # }
-    return Response(serializer1.data)
+    return Response(serializer.data)
 
 @api_view(['POST'])
 def additem(request):
-    serializer2=menuSerializer(data=request.data)
+    serializer=menuSerializer(data=request.data)
 
-    if serializer2.is_valid():
-        serializer2.save()
-    return Response(serializer2.data)
+    if serializer.is_valid():
+        serializer.save()
+    return Response(serializer.data)
 
 @api_view(['GET'])
 def PreviousOrders(request,pk):
