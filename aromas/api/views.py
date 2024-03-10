@@ -100,4 +100,4 @@ def login(request):
     for user in userlist:
         if user.get('userid') == d['userid'] and user.get('pswd') == d['pswd']:
             return HttpResponse(json.dumps({'message': 'Successfully logged in'}), status=200)
-    return HttpResponse(json.dumps({'message': 'Invalid credentials'}), status=400)
+    return HttpResponse(json.dumps({'message': 'Invalid credentials'}), status=201)
