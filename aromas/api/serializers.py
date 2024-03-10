@@ -35,7 +35,7 @@ class loginSerializer(serializers.ModelSerializer):
 class ordertestSerializer(serializers.ModelSerializer):
     class Meta:
         model=data
-        fields=['food_id','quantity']
+        fields=['cart_id','food_id','quantity']
 
         
     
