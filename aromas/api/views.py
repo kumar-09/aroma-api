@@ -10,6 +10,8 @@ import json
 
 @api_view(['POST'])
 def register(request):
+
+    #return request
     serializer = userSerializer(data=request.data)
     
     d = {
@@ -79,18 +81,21 @@ def Cart(request):
     return HttpResponse("cart added", status = 201) 
 
 @api_view(['GET'])
-def categorylist(request, type):    
+def categorylist(request):    
     cat = category.objects.all()
     catlist = list()
     typelist = list()
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def login(request):
     userlist = list(users.objects.all().values())
+    data = request.data
+    p1 = data.get('userid')
+    p2 = data.get('pswd')
     d = {
-        'userid': request.data.get('userid'),
-        'pswd': request.data.get('pswd')
+        'userid': p1,
+        'pswd': p2
     }
     for user in userlist:
         if user.get('userid') == d['userid'] and user.get('pswd') == d['pswd']:
