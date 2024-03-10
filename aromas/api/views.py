@@ -63,16 +63,16 @@ def PreviousOrders(request,pk):
     OrderList=data.objects.filter(userid=pk)
     serializer2=ordertestSerializer(OrderList ,many=True)
 
-    for OrderCartId in serializer1.data:
-        Cartid=OrderCartId['cart_id']
-        dict2=[]
+    dict2=[]
     for OrderData in serializer2.data:
         FoodId=OrderData['food_id']
         Quantity=OrderData['quantity']
         dict2.append({FoodId:Quantity})
+    for OrderCartId in serializer1.data:
+        Cartid=OrderCartId['cart_id']
 
     
-        PrevOrderList.append({Cartid:dict2})
+    PrevOrderList.append({Cartid:dict2})
     return Response(PrevOrderList)
 
 @api_view(['POST'])
