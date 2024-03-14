@@ -4,7 +4,6 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from api.serializers import userSerializer, loginSerializer, menuSerializer , CategorySerializer,dataSerializer,ordertestSerializer
 from main.models import menu,category,users,data
-from api.forms import menuaddform
 from django.http import HttpResponse,JsonResponse
 import json
 
@@ -28,13 +27,6 @@ def getmenu(request):
     return Response(serializer.data)
 
 
-@api_view(['POST'])
-def addFood(request):
-    form= menuaddform(request.POST,request.FILES)
-    if form.is_valid():
-        form.save()
-    return Response({'success': True, 'data': form.data})
-
 @api_view(['GET'])
 def Category(request , type):
     Menulist = menu.objects.filter(food_id__Type=type)
@@ -44,11 +36,25 @@ def Category(request , type):
 
 @api_view(['POST'])
 def additem(request):
-    serializer=menuSerializer(data=request.data)
+    serializer1 = CategorySerializer(data=request.data)
+    
+    if serializer1.is_valid():
+        category_instance = serializer1.save()
+    
+        serializer2 = menuSerializer(data=request.data)
+        if serializer2.is_valid():
+            serializer2.validated_data['category'] = category_instance
+            menu_instance = serializer2.save()
+    
+            return Response({
+                'message': 'Item added successfully',
+                'category_id': category_instance.id,
+                'menu_id': menu_instance.id
+            })
+    
+    return Response(serializer1.errors, status=400)
 
-    if serializer.is_valid():
-        serializer.save()
-    return Response(serializer.data)
+
 
 @api_view(['GET'])
 def PreviousOrders(request,pk):

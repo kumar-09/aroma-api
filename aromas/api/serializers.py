@@ -20,7 +20,7 @@ class menuSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model=category
-        fields ='__all__'
+        fields = '__all__'
 
 class dataSerializer(serializers.ModelSerializer):
     class Meta:
