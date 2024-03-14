@@ -27,15 +27,14 @@ class dataSerializer(serializers.ModelSerializer):
         model=data
         fields=['cart_id']
 
-class loginSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = users
-        fields = ['userid', 'pswd']
-
 class ordertestSerializer(serializers.ModelSerializer):
     class Meta:
         model=data
         fields=['cart_id','food_id','quantity']
 
         
-    
+
+# class loginSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = users
+#         fields = ['userid', 'pswd']

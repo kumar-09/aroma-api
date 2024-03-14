@@ -16,7 +16,6 @@ class users(models.Model):
 
 class category(models.Model):
     Type = models.CharField(primary_key=True,max_length=50)
-    # food_id = models.CharField(primary_key=True, max_length=50)
     image = models.ImageField(upload_to='category/')    
     def __str__(self):
         return self.Type 
@@ -41,10 +40,10 @@ class data(models.Model):
     userid = models.ForeignKey(users, on_delete=models.CASCADE,)
     cart_id = models.CharField(max_length=30)
     food_id = models.ForeignKey(menu, on_delete=models.CASCADE)
-    quantity = models.IntegerField(validators=[MinValueValidator(0),MaxValueValidator(10)])
+    quantity = models.IntegerField(validators=[MinValueValidator(1),MaxValueValidator(10)])
 
     def __str__(self):
-        return self.userid + '-' + self.cart_id
+        return self.userid_id + '-' + self.cart_id
 
     class Meta:
         verbose_name_plural = 'data'

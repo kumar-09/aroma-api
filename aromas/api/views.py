@@ -1,11 +1,11 @@
-from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from api.serializers import userSerializer, loginSerializer, menuSerializer , CategorySerializer,dataSerializer,ordertestSerializer
+from api.serializers import userSerializer, menuSerializer , CategorySerializer,dataSerializer,ordertestSerializer
 from main.models import menu,category,users,data
-from django.http import HttpResponse,JsonResponse
+from django.http import HttpResponse
 import json
+# from django.contrib.auth import get_user_model
 
 @api_view(['POST'])
 def register(request):
@@ -30,8 +30,8 @@ def getmenu(request):
 
 
 @api_view(['GET'])
-def Category(request , type):
-    Menulist = menu.objects.filter(food_id__Type=type)
+def menu_category(request , type):
+    Menulist = menu.objects.filter(Type=type)
     serializer = menuSerializer(Menulist ,many=True)
 
     return Response(serializer.data)
@@ -77,7 +77,7 @@ def PreviousOrders(request,pk):
     return Response(PrevOrderList)
 
 @api_view(['POST'])             
-def Cart(request):
+def addCart(request):
     user = (request.data).get('userid')
     cart = (request.data).get('cart_id')
     foodid = (request.data).get('food_ids')
@@ -87,10 +87,16 @@ def Cart(request):
     return HttpResponse("cart added", status = 201) 
 
 @api_view(['GET'])
-def categorylist(request):    
+def all_category_menu(request):    
     cat = category.objects.all()
-    catlist = list()
-    typelist = list()
+    menulist = list(menu.objects.all().values())
+    catdict = dict()
+
+    for data in menulist:
+        if [data,] != catdict.setdefault(data['Type_id'], [data,]):
+            catdict[data['Type_id']].append(data)
+    
+    return Response(catdict)
 
 
 @api_view(['POST'])
@@ -106,4 +112,10 @@ def login(request):
     for user in userlist:
         if user.get('userid') == d['userid'] and user.get('pswd') == d['pswd']:
             return HttpResponse(json.dumps({'message': 'Successfully logged in'}), status=200)
-    return HttpResponse(json.dumps({'message': 'Invalid credentials'}), status=201)
+    return HttpResponse(json.dumps({'message': 'Invalid credentials'}), status=400)
+
+@api_view(['GET'])
+def categorylist(request):
+    catlist = category.objects.all()
+    serializer = CategorySerializer(catlist, many = True)
+    return Response(serializer.data)
