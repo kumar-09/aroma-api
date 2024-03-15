@@ -1,4 +1,5 @@
 from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from api.serializers import userSerializer, menuSerializer , CategorySerializer,dataSerializer,ordertestSerializer
@@ -38,24 +39,13 @@ def menu_category(request , type):
 
 @api_view(['POST'])
 def additem(request):
-    serializer1 = CategorySerializer(data=request.data)
+    serializer = menuSerializer(data=request.data)
     
-    if serializer1.is_valid():
-        category_instance = serializer1.save()
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-        serializer2 = menuSerializer(data=request.data)
-        if serializer2.is_valid():
-            serializer2.validated_data['category'] = category_instance
-            menu_instance = serializer2.save()
-    
-            return Response({
-                'message': 'Item added successfully',
-                'category_id': category_instance.id,
-                'menu_id': menu_instance.id
-            })
-    
-    return Response(serializer1.errors, status=400)
-
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
