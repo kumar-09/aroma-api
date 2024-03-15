@@ -7,6 +7,7 @@ class users(models.Model):
     userid = models.CharField(primary_key=True, max_length=15)
     name = models.CharField(max_length=50)
     pswd = models.CharField(max_length=15)
+    is_admin=models.BooleanField(default=False)
 
     def __str__(self):
         return self.userid    
