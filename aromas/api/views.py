@@ -39,13 +39,36 @@ def menu_category(request , type):
 
 @api_view(['POST'])
 def additem(request):
-    serializer = menuSerializer(data=request.data)
-    
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    food_data={
+        'food_id' : request.data.get('food_id'),
+        'Type' : request.data.get('Type'),
+        'name' : request.data.get('name'),
+        'price' : request.data.get('price'),
+        'image' : request.data.get('image'),
+    }
+    cat_Data={
+        'Type': request.data.get('Type'),
+        'image' : request.data.get('cat_image'),
+    }
+    serialisedCategory = CategorySerializer(data=cat_Data)
+    if serialisedCategory.is_valid():
+        serialisedCategory.save()
+        serialisedFood = menuSerializer(data=food_data)
+        if serialisedFood.is_valid():
+            serialisedFood.save()
+            return Response({'message':'Item added Successfully'}, status=200)
+        else:
+            return Response({'err':'Item Already Exist'}, status=400)
+    else:
+        serialisedFood = menuSerializer(data=food_data)
+        if serialisedFood.is_valid():
+            serialisedFood.save()
+            return Response({'message':'Item added Successfully'}, status=200)
+        else:
+            return Response({'err':'Item Already Exist'}, status=400)
+
+
+
 
 
 @api_view(['GET'])
