@@ -20,8 +20,8 @@ def register(request):
     }
     if serializer.is_valid():
         serializer.save()
-        return HttpResponse(json.dumps(d),"Sucessfully created user.", status = 201)
-    return HttpResponse(json.dumps(d),"User already exists.", status = 400)
+        return HttpResponse(json.dumps(d),status = 201)
+    return HttpResponse(json.dumps(d),status = 400)
     
 @api_view(['GET'])
 def getmenu(request):
@@ -66,9 +66,6 @@ def additem(request):
             return Response({'message':'Item added Successfully'}, status=200)
         else:
             return Response({'err':'Item Already Exist'}, status=400)
-
-
-
 
 
 @api_view(['GET'])
@@ -118,13 +115,19 @@ def login(request):
     data = request.data
     p1 = data.get('userid')
     p2 = data.get('pswd')
+    p3 = data.get('name')
     d = {
         'userid': p1,
-        'pswd': p2
+        'pswd': p2,
+        'name': p3
     }
     for user in userlist:
         if user.get('userid') == d['userid'] and user.get('pswd') == d['pswd']:
-            return HttpResponse(json.dumps({'message': 'Successfully logged in'}), status=200)
+            dic={
+                'userid':p1,
+                'name':p3,
+            }
+            return HttpResponse(json.dumps(dic), status=200)
     return HttpResponse(json.dumps({'message': 'Invalid credentials'}), status=400)
 
 @api_view(['GET'])
@@ -132,3 +135,4 @@ def categorylist(request):
     catlist = category.objects.all()
     serializer = CategorySerializer(catlist, many = True)
     return Response(serializer.data)
+
