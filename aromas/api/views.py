@@ -98,13 +98,13 @@ def addCart(request):
 
 @api_view(['GET'])
 def all_category_menu(request):    
-    cat = category.objects.all()
-    menulist = list(menu.objects.all().values())
+    menulist = menu.objects.all()
+    serializer = menuSerializer(menulist, many = True)
     catdict = dict()
 
-    for data in menulist:
-        if [data,] != catdict.setdefault(data['Type_id'], [data,]):
-            catdict[data['Type_id']].append(data)
+    for data in serializer.data:
+        if [data,] != catdict.setdefault(data['Type'], [data,]):
+            catdict[data['Type']].append(data)
     
     return Response(catdict)
 
