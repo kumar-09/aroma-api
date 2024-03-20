@@ -10,10 +10,8 @@ import json
 
 @api_view(['POST'])
 def register(request):
-
-    #return request
+    # return request
     serializer = userSerializer(data=request.data)
-    
     d = {
         'userid':request.data.get('userid'),
         'name':request.data.get('name'),
@@ -22,7 +20,7 @@ def register(request):
         serializer.save()
         return HttpResponse(json.dumps(d),status = 201)
     return HttpResponse({'message': 'Invalid credentials'},status = 400)
-    
+
 @api_view(['GET'])
 def getmenu(request):
     Menulist = menu.objects.all()
