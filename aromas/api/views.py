@@ -21,7 +21,7 @@ def register(request):
     if serializer.is_valid():
         serializer.save()
         return HttpResponse(json.dumps(d),status = 201)
-    return HttpResponse(json.dumps(d),status = 400)
+    return HttpResponse("User Already Exist",status = 400)
     
 @api_view(['GET'])
 def getmenu(request):
