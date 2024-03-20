@@ -10,6 +10,6 @@ urlpatterns = [
     path('prevlist/<str:pk>',views.PreviousOrders,name='LastOrders'),
     path('addCart/',views.addCart, name='Cart'),
     path('all-category-menu/',views.all_category_menu, name='Category list'),
-    path('category-list/',views.categorylist, name='Category list')
+    path('category-list/',views.categorylist, name='Category list'),
 ]
 

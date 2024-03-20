@@ -20,8 +20,8 @@ def register(request):
     }
     if serializer.is_valid():
         serializer.save()
-        return HttpResponse(json.dumps(d),"Sucessfully created user.", status = 201)
-    return HttpResponse(json.dumps(d),"User already exists.", status = 400)
+        return HttpResponse(json.dumps(d),status = 201)
+    return HttpResponse({'message': 'Invalid credentials'},status = 400)
     
 @api_view(['GET'])
 def getmenu(request):
@@ -39,13 +39,33 @@ def menu_category(request , type):
 
 @api_view(['POST'])
 def additem(request):
-    serializer = menuSerializer(data=request.data)
-    
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    food_data={
+        'food_id' : request.data.get('food_id'),
+        'Type' : request.data.get('Type'),
+        'name' : request.data.get('name'),
+        'price' : request.data.get('price'),
+        'image' : request.data.get('image'),
+    }
+    cat_Data={
+        'Type': request.data.get('Type'),
+        'image' : request.data.get('cat_image'),
+    }
+    serialisedCategory = CategorySerializer(data=cat_Data)
+    if serialisedCategory.is_valid():
+        serialisedCategory.save()
+        serialisedFood = menuSerializer(data=food_data)
+        if serialisedFood.is_valid():
+            serialisedFood.save()
+            return Response({'message':'Item added Successfully'}, status=200)
+        else:
+            return Response({'err':'Item Already Exist'}, status=400)
+    else:
+        serialisedFood = menuSerializer(data=food_data)
+        if serialisedFood.is_valid():
+            serialisedFood.save()
+            return Response({'message':'Item added Successfully'}, status=200)
+        else:
+            return Response({'err':'Item Already Exist'}, status=400)
 
 
 @api_view(['GET'])
@@ -78,13 +98,13 @@ def addCart(request):
 
 @api_view(['GET'])
 def all_category_menu(request):    
-    cat = category.objects.all()
-    menulist = list(menu.objects.all().values())
+    menulist = menu.objects.all()
+    serializer = menuSerializer(menulist, many = True)
     catdict = dict()
 
-    for data in menulist:
-        if [data,] != catdict.setdefault(data['Type_id'], [data,]):
-            catdict[data['Type_id']].append(data)
+    for data in serializer.data:
+        if [data,] != catdict.setdefault(data['Type'], [data,]):
+            catdict[data['Type']].append(data)
     
     return Response(catdict)
 
@@ -101,8 +121,13 @@ def login(request):
     }
     for user in userlist:
         if user.get('userid') == d['userid'] and user.get('pswd') == d['pswd']:
-            return HttpResponse(json.dumps({'message': 'Successfully logged in'}), status=200)
-    return HttpResponse(json.dumps({'message': 'Invalid credentials'}), status=400)
+            dic={
+                'userid':user.get('userid'),
+                'name':user.get('name'),
+                'is_admin':user.get('is_admin')
+            }
+            return HttpResponse(json.dumps(dic), status=200)
+    return HttpResponse(json.dumps({'message':'Invalid credentials'}), status=400)
 
 @api_view(['GET'])
 def categorylist(request):
