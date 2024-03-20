@@ -64,5 +64,4 @@ class session(models.Model):
         return self.userid    
 
     class Meta:
-        verbose_name_plural = 'session'    
-
+        verbose_name_plural = 'session'
