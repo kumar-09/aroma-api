@@ -21,7 +21,7 @@ def register(request):
     if serializer.is_valid():
         serializer.save()
         return HttpResponse(json.dumps(d),status = 201)
-    return HttpResponse("User Already Exist",status = 400)
+    return HttpResponse({'message': 'Invalid credentials'},status = 400)
     
 @api_view(['GET'])
 def getmenu(request):
@@ -124,13 +124,13 @@ def login(request):
             dic={
                 'userid':user.get('userid'),
                 'name':user.get('name'),
+                'is_admin':user.get('is_admin')
             }
             return HttpResponse(json.dumps(dic), status=200)
-    return HttpResponse(json.dumps({'message': 'Invalid credentials'}), status=400)
+    return HttpResponse(json.dumps({'message':'Invalid credentials'}), status=400)
 
 @api_view(['GET'])
 def categorylist(request):
     catlist = category.objects.all()
     serializer = CategorySerializer(catlist, many = True)
     return Response(serializer.data)
-
