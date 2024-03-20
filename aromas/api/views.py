@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from api.serializers import userSerializer, menuSerializer , CategorySerializer,dataSerializer,ordertestSerializer
-from main.models import menu,category,users,data
+from main.models import menu,category,users,data,session
 from django.http import HttpResponse
 import json
 # from django.contrib.auth import get_user_model
@@ -17,6 +17,9 @@ def register(request):
     d = {
         'userid':request.data.get('userid'),
         'name':request.data.get('name'),
+        'is_admin':request.data.get('is_admin'),
+        'mobile':request.data.get('mobile'),
+        'address':request.data.get('address'),
     }
     if serializer.is_valid():
         serializer.save()
@@ -92,8 +95,11 @@ def addCart(request):
     cart = (request.data).get('cart_id')
     foodid = (request.data).get('food_ids')
     quant = (request.data).get('quantity')
+    name = (request.data).get('name')
+    mobile = (request.data).get('mobile')
+    address = (request.data).get('address')
     for i in range(len(foodid)):
-        data.objects.create(userid_id = user, cart_id = cart, food_id_id = foodid[i], quantity = quant[i])
+        data.objects.create(userid_id = user, cart_id = cart, food_id_id = foodid[i], quantity = quant[i], name = name, mobile = mobile, address = address)
     return HttpResponse("cart added", status = 201) 
 
 @api_view(['GET'])
@@ -112,19 +118,19 @@ def all_category_menu(request):
 @api_view(['POST'])
 def login(request):
     userlist = list(users.objects.all().values())
-    data = request.data
-    p1 = data.get('userid')
-    p2 = data.get('pswd')
     d = {
-        'userid': p1,
-        'pswd': p2
+        'userid': request.data.get('userid'),
+        'pswd': request.data.get('pswd')
     }
+
     for user in userlist:
         if user.get('userid') == d['userid'] and user.get('pswd') == d['pswd']:
             dic={
                 'userid':user.get('userid'),
                 'name':user.get('name'),
-                'is_admin':user.get('is_admin')
+                'is_admin':user.get('is_admin'),
+                'mobile':user.get('mobile'),
+                'address':user.get('address')
             }
             return HttpResponse(json.dumps(dic), status=200)
     return HttpResponse(json.dumps({'message':'Invalid credentials'}), status=400)
@@ -134,3 +140,22 @@ def categorylist(request):
     catlist = category.objects.all()
     serializer = CategorySerializer(catlist, many = True)
     return Response(serializer.data)
+
+@api_view(['GET'])
+def isauth(request, session_key):
+    current_session = session.objects.get(session_key = session_key)
+    if current_session is None:
+        return HttpResponse(json.dumps({'message':'Session key not found.'}), status=400)
+    else:
+        if current_session.get('last_activity').hours() <= 1:
+            userid = current_session.get('userid')
+            user = users.objects.get(userid=userid)
+            dic={
+                    'userid':user.get('userid'),
+                    'name':user.get('name'),
+                    'is_admin':user.get('is_admin'),
+                    'mobile':user.get('mobile'),
+                    'address':user.get('address')
+                }
+            return HttpResponse(json.dumps(dic), status=200)
+        return HttpResponse(json.dumps({'message':'Session expired.'}), status=400)
