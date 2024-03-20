@@ -8,7 +8,7 @@ class users(models.Model):
     name = models.CharField(max_length=50)
     pswd = models.CharField(max_length=15)
     is_admin=models.BooleanField(default=False)
-    mobile = models.IntegerField(validators=[MinValueValidator(10),MaxValueValidator(10)])
+    mobile = models.IntegerField(validators=[MinValueValidator(6000000000),MaxValueValidator(9999999999)])
     address = models.CharField(max_length=100)
 
     def __str__(self):

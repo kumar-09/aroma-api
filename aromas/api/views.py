@@ -17,7 +17,7 @@ def register(request):
     d = {
         'userid':request.data.get('userid'),
         'name':request.data.get('name'),
-        'is_admin':request.data.get('is_admin'),
+        # 'is_admin':request.data.get('is_admin'),
         'mobile':request.data.get('mobile'),
         'address':request.data.get('address'),
     }
