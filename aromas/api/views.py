@@ -115,17 +115,15 @@ def login(request):
     data = request.data
     p1 = data.get('userid')
     p2 = data.get('pswd')
-    p3 = data.get('name')
     d = {
         'userid': p1,
-        'pswd': p2,
-        'name': p3
+        'pswd': p2
     }
     for user in userlist:
         if user.get('userid') == d['userid'] and user.get('pswd') == d['pswd']:
             dic={
-                'userid':p1,
-                'name':p3,
+                'userid':user.get('userid'),
+                'name':user.get('name'),
             }
             return HttpResponse(json.dumps(dic), status=200)
     return HttpResponse(json.dumps({'message': 'Invalid credentials'}), status=400)
