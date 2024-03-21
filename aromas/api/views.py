@@ -13,28 +13,29 @@ from django.utils import timezone
 @api_view(['POST'])
 def register(request):
     # return request
-    serializer = userSerializer(data=request.data)
-    # KEYLEN=30
-    # key="".join(random.choice(string.ascii_letters+string.digits) for _ in range(KEYLEN))
-    d = {
+    registered_data = {
         'userid':request.data.get('userid'),
         'name':request.data.get('name'),
-        # 'is_admin':request.data.get('is_admin'),
+        'pswd':request.data.get('pswd'),
+        'is_admin':request.data.get('is_admin'),
         'mobile':request.data.get('mobile'),
         'address':request.data.get('address'),
     }
-    # session_data={
-    #     'userid':d['userid'],
-    #     'session_key':key
-    # }
+    serializer = userSerializer(data=registered_data)
     if serializer.is_valid():
         serializer.save()
-        # sessionserializer=sessionSerializer(data=session_data)
 
-        # if sessionserializer.is_valid():
-        #     sessionserializer.save()
-        return HttpResponse(json.dumps(d),status = 201)
-    return HttpResponse({'message':'Invalid credentials'},status = 400)
+        KEYLEN=30
+        key="".join(random.choice(string.ascii_letters+string.digits) for _ in range(KEYLEN))
+        session_data={
+            'userid':registered_data['userid'],
+            'session_key':key
+        }
+        sessionserializer=sessionSerializer(data=session_data)
+        if sessionserializer.is_valid():
+            sessionserializer.save()
+        return HttpResponse(json.dumps(registered_data),status = 201)
+    return HttpResponse(json.dumps({'message':'Invalid credentials'}),status = 400)
 
 @api_view(['GET'])
 def getmenu(request):
@@ -42,12 +43,10 @@ def getmenu(request):
     serializer = menuSerializer(Menulist , many=True)
     return Response(serializer.data)
 
-
 @api_view(['GET'])
 def menu_category(request , type):
     Menulist = menu.objects.filter(Type=type)
     serializer = menuSerializer(Menulist ,many=True)
-
     return Response(serializer.data)
 
 @api_view(['POST'])
@@ -79,8 +78,7 @@ def additem(request):
             return Response({'message':'Item added Successfully'}, status=200)
         else:
             return Response({'err':'Item Already Exist'}, status=400)
-
-
+        
 @api_view(['GET'])
 def PreviousOrders(request,pk):
     PrevOrderList=[]
@@ -132,12 +130,6 @@ def login(request):
         'userid': request.data.get('userid'),
         'pswd': request.data.get('pswd')
     }
-    KEYLEN=30
-    key = "".join(random.choice(string.ascii_letters+string.digits) for _ in range(KEYLEN))   
-    session_data={
-        'userid':d['userid'],
-        'session_key':key
-    }
 
     for user in userlist:
         if user.get('userid') == d['userid'] and user.get('pswd') == d['pswd']:
@@ -148,10 +140,23 @@ def login(request):
                 'mobile':user.get('mobile'),
                 'address':user.get('address')
             }
-            sessionserializer=sessionSerializer(data=session_data)
-            if sessionserializer.is_valid():
-                sessionserializer.save()
-            return HttpResponse(json.dumps(dic), status=200)
+            KEYLEN=30
+            key = "".join(random.choice(string.ascii_letters+string.digits) for _ in range(KEYLEN))   
+            session_data={
+                'userid':d['userid'],
+                'session_key':key,
+            }
+            current_session = session.objects.filter(userid_id=d['userid']).first()
+            if (timezone.now()-current_session.last_activity).total_seconds() >= 3600:
+
+                current_session.last_activity=timezone.now() #to change the value of last_activty
+                sessionserializer=sessionSerializer(data=session_data)
+                if sessionserializer.is_valid():
+                    sessionserializer.save()
+                    return HttpResponse(json.dumps(dic), status=200)
+            else:
+                return HttpResponse('Already active',status=201)
+                    
     return HttpResponse(json.dumps({'message':'Invalid credentials'}), status=400)
 
 @api_view(['GET'])

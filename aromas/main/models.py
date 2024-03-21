@@ -58,7 +58,7 @@ class data(models.Model):
 class session(models.Model):
     userid = models.ForeignKey(users, on_delete=models.CASCADE)
     last_activity = models.DateTimeField(auto_now_add=True)
-    session_key = models.CharField(max_length=30)
+    session_key = models.CharField(primary_key=True,max_length=30)
 
     def __str__(self):
         return self.userid_id  
