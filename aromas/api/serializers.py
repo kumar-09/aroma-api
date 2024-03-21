@@ -35,7 +35,7 @@ class ordertestSerializer(serializers.ModelSerializer):
 class sessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = session
-        fields=['userid']
+        fields='__all__'
 
 # class loginSerializer(serializers.ModelSerializer):
 #     class Meta:

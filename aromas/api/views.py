@@ -2,16 +2,18 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from api.serializers import userSerializer, menuSerializer , CategorySerializer,dataSerializer,ordertestSerializer
+from api.serializers import userSerializer, menuSerializer , CategorySerializer,dataSerializer,ordertestSerializer,sessionSerializer
 from main.models import menu,category,users,data,session
 from django.http import HttpResponse
-import json
+import json,random,string
 # from django.contrib.auth import get_user_model
 
 @api_view(['POST'])
 def register(request):
     # return request
     serializer = userSerializer(data=request.data)
+    # KEYLEN=30
+    # key="".join(random.choice(string.ascii_letters+string.digits) for _ in range(KEYLEN))
     d = {
         'userid':request.data.get('userid'),
         'name':request.data.get('name'),
@@ -19,10 +21,18 @@ def register(request):
         'mobile':request.data.get('mobile'),
         'address':request.data.get('address'),
     }
+    # session_data={
+    #     'userid':d['userid'],
+    #     'session_key':key
+    # }
     if serializer.is_valid():
         serializer.save()
+        # sessionserializer=sessionSerializer(data=session_data)
+
+        # if sessionserializer.is_valid():
+        #     sessionserializer.save()
         return HttpResponse(json.dumps(d),status = 201)
-    return HttpResponse({'message': 'Invalid credentials'},status = 400)
+    return HttpResponse({'message':'Invalid credentials'},status = 400)
 
 @api_view(['GET'])
 def getmenu(request):
@@ -120,6 +130,12 @@ def login(request):
         'userid': request.data.get('userid'),
         'pswd': request.data.get('pswd')
     }
+    KEYLEN=30
+    key = "".join(random.choice(string.ascii_letters+string.digits) for _ in range(KEYLEN))   
+    session_data={
+        'userid':d['userid'],
+        'session_key':key
+    }
 
     for user in userlist:
         if user.get('userid') == d['userid'] and user.get('pswd') == d['pswd']:
@@ -130,6 +146,9 @@ def login(request):
                 'mobile':user.get('mobile'),
                 'address':user.get('address')
             }
+            sessionserializer=sessionSerializer(data=session_data)
+            if sessionserializer.is_valid():
+                sessionserializer.save()
             return HttpResponse(json.dumps(dic), status=200)
     return HttpResponse(json.dumps({'message':'Invalid credentials'}), status=400)
 
