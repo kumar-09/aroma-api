@@ -61,7 +61,7 @@ class session(models.Model):
     session_key = models.CharField(max_length=30)
 
     def __str__(self):
-        return self.userid    
+        return self.userid_id  
 
     class Meta:
         verbose_name_plural = 'session'

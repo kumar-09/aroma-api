@@ -6,6 +6,8 @@ from api.serializers import userSerializer, menuSerializer , CategorySerializer,
 from main.models import menu,category,users,data,session
 from django.http import HttpResponse
 import json,random,string
+import datetime
+from django.utils import timezone
 # from django.contrib.auth import get_user_model
 
 @api_view(['POST'])
@@ -158,21 +160,40 @@ def categorylist(request):
     serializer = CategorySerializer(catlist, many = True)
     return Response(serializer.data)
 
+# @api_view(['GET'])
+# def isauth(request, session_key):
+#     current_session = session.objects.get(session_key = session_key)
+#     if current_session is None:
+#         return HttpResponse(json.dumps({'message':'Session key not found.'}), status=400)
+#     else:
+#         if current_session.get('last_activity').hours() <= 1:
+#             userid = current_session.get('userid')
+#             user = users.objects.get(userid=userid)
+#             dic={
+#                     'userid':user.get('userid'),
+#                     'name':user.get('name'),
+#                     'is_admin':user.get('is_admin'),
+#                     'mobile':user.get('mobile'),
+#                     'address':user.get('address')
+#                 }
+#             return HttpResponse(json.dumps(dic), status=200)
+#         return HttpResponse(json.dumps({'message':'Session expired.'}), status=400)
+
 @api_view(['GET'])
 def isauth(request, session_key):
     current_session = session.objects.get(session_key = session_key)
     if current_session is None:
         return HttpResponse(json.dumps({'message':'Session key not found.'}), status=400)
     else:
-        if current_session.get('last_activity').hours() <= 1:
-            userid = current_session.get('userid')
+        if (timezone.now()-current_session.last_activity).total_seconds() <= 3600:
+            userid = current_session.userid
             user = users.objects.get(userid=userid)
-            dic={
-                    'userid':user.get('userid'),
-                    'name':user.get('name'),
-                    'is_admin':user.get('is_admin'),
-                    'mobile':user.get('mobile'),
-                    'address':user.get('address')
+            profile_info={
+                    'userid':user.userid,
+                    'name':user.name,
+                    'is_admin':user.is_admin,
+                    'mobile':user.mobile,
+                    'address':user.address
                 }
-            return HttpResponse(json.dumps(dic), status=200)
+            return HttpResponse(json.dumps(profile_info), status=200)
         return HttpResponse(json.dumps({'message':'Session expired.'}), status=400)
