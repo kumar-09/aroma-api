@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from main.models import users
-from main.models import menu,category,data,data
+from main.models import menu,category,data,data,session
 from django.contrib.auth import get_user_model
 
 
@@ -32,7 +32,10 @@ class ordertestSerializer(serializers.ModelSerializer):
         model=data
         fields=['cart_id','food_id','quantity']
 
-        
+class sessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = session
+        fields='__all__'
 
 # class loginSerializer(serializers.ModelSerializer):
 #     class Meta:

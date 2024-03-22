@@ -8,6 +8,8 @@ class users(models.Model):
     name = models.CharField(max_length=50)
     pswd = models.CharField(max_length=15)
     is_admin=models.BooleanField(default=False)
+    mobile = models.IntegerField(validators=[MinValueValidator(6000000000),MaxValueValidator(9999999999)])
+    address = models.CharField(max_length=100)
 
     def __str__(self):
         return self.userid    
@@ -42,6 +44,9 @@ class data(models.Model):
     cart_id = models.CharField(max_length=30)
     food_id = models.ForeignKey(menu, on_delete=models.CASCADE)
     quantity = models.IntegerField(validators=[MinValueValidator(1),MaxValueValidator(10)])
+    name = models.CharField(max_length=50)
+    mobile = models.IntegerField(validators=[MinValueValidator(6000000000),MaxValueValidator(9999999999)])
+    address = models.CharField(max_length=100)
 
     def __str__(self):
         return self.userid_id + '-' + self.cart_id
@@ -53,10 +58,10 @@ class data(models.Model):
 class session(models.Model):
     userid = models.ForeignKey(users, on_delete=models.CASCADE)
     last_activity = models.DateTimeField(auto_now_add=True)
+    session_key = models.CharField(primary_key=True,max_length=30)
 
     def __str__(self):
-        return self.userid    
+        return self.userid_id  
 
     class Meta:
-        verbose_name_plural = 'session'    
-
+        verbose_name_plural = 'session'

@@ -2,39 +2,127 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from api.serializers import userSerializer, menuSerializer , CategorySerializer,dataSerializer,ordertestSerializer
-from main.models import menu,category,users,data
+from api.serializers import userSerializer, menuSerializer , CategorySerializer,dataSerializer,ordertestSerializer,sessionSerializer
+from main.models import menu,category,users,data,session
 from django.http import HttpResponse
-import json
+import json,random,string
+from django.utils import timezone
 # from django.contrib.auth import get_user_model
 
 @api_view(['POST'])
 def register(request):
-
-    #return request
-    serializer = userSerializer(data=request.data)
-    
-    d = {
+    # return request
+    registered_data = {
         'userid':request.data.get('userid'),
         'name':request.data.get('name'),
+        'pswd':request.data.get('pswd'),
+        'mobile':request.data.get('mobile'),
+        'address':request.data.get('address'),
     }
+    serializer = userSerializer(data=registered_data)
     if serializer.is_valid():
         serializer.save()
-        return HttpResponse(json.dumps(d),status = 201)
-    return HttpResponse({'message': 'Invalid credentials'},status = 400)
+
+        KEYLEN=30
+        key="".join(random.choice(string.ascii_letters+string.digits) for _ in range(KEYLEN))
+        session_data={
+            'userid':registered_data['userid'],
+            'session_key':key
+        }
+        sessionserializer=sessionSerializer(data=session_data)
+        if sessionserializer.is_valid():
+            sessionserializer.save()
+            registered_data['session_key']=key
+        return HttpResponse(json.dumps(registered_data),status = 201)
+    return HttpResponse(json.dumps({'message':'User Already Exist'}),status = 400)
+
+@api_view(['POST'])
+def login(request):
+    userlist = list(users.objects.all().values())
+    d = {
+        'userid': request.data.get('userid'),
+        'pswd': request.data.get('pswd')
+    }
+
+    for user in userlist:
+        if user.get('userid') == d['userid'] and user.get('pswd') == d['pswd']:
+            dic={
+                'userid':user.get('userid'),
+                'name':user.get('name'),
+                'is_admin':user.get('is_admin'),
+                'mobile':user.get('mobile'),
+                'address':user.get('address')
+            }
+            KEYLEN=30
+            key = "".join(random.choice(string.ascii_letters+string.digits) for _ in range(KEYLEN))   
+            session_data={
+                'userid':d['userid'],
+                'session_key':key,
+            }
+            current_session = session.objects.filter(userid_id=d['userid']).first()
+            if current_session is None:
+                sessionserializer=sessionSerializer(data=session_data)
+                if sessionserializer.is_valid():
+                    sessionserializer.save()
+                    dic['session_key']=key
+                    return HttpResponse(json.dumps(dic), status=200)                    
+
+            else:    
+                if (timezone.now()-current_session.last_activity).total_seconds() > 3600:
+
+                    current_session.last_activity=timezone.now() #to change the value of last_activty
+                    sessionserializer=sessionSerializer(data=session_data)
+                    if sessionserializer.is_valid():
+                        sessionserializer.save()
+                        dic['session_key']=key
+                        return HttpResponse(json.dumps(dic), status=200)
+                else:
+                    dic['session_key']=current_session.session_key
+                    return HttpResponse(json.dumps(dic),status=200)
+                    
+    return HttpResponse(json.dumps({'message':'Invalid credentials'}), status=400)
+
+@api_view(['POST'])             
+def addCart(request):
+    user = (request.data).get('userid')
+    cart = (request.data).get('cart_id')
+    foodid = (request.data).get('food_ids')
+    quant = (request.data).get('quantity')
+    name = (request.data).get('name')
+    mobile = (request.data).get('mobile')
+    address = (request.data).get('address')
+    for i in range(len(foodid)):
+        data.objects.create(userid_id = user, cart_id = cart, food_id_id = foodid[i], quantity = quant[i], name = name, mobile = mobile, address = address)
+    return HttpResponse("cart added", status = 201) 
+
+@api_view(['GET'])
+def categorylist(request):
+    catlist = category.objects.all()
+    serializer = CategorySerializer(catlist, many = True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def all_category_menu(request):    
+    menulist = menu.objects.all()
+    serializer = menuSerializer(menulist, many = True)
+    catdict = dict()
+
+    for data in serializer.data:
+        if [data,] != catdict.setdefault(data['Type'], [data,]):
+            catdict[data['Type']].append(data)
     
+    return Response(catdict)
+
 @api_view(['GET'])
 def getmenu(request):
     Menulist = menu.objects.all()
     serializer = menuSerializer(Menulist , many=True)
     return Response(serializer.data)
 
-
 @api_view(['GET'])
 def menu_category(request , type):
     Menulist = menu.objects.filter(Type=type)
     serializer = menuSerializer(Menulist ,many=True)
-
     return Response(serializer.data)
 
 @api_view(['POST'])
@@ -66,8 +154,7 @@ def additem(request):
             return Response({'message':'Item added Successfully'}, status=200)
         else:
             return Response({'err':'Item Already Exist'}, status=400)
-
-
+        
 @api_view(['GET'])
 def PreviousOrders(request,pk):
     PrevOrderList=[]
@@ -76,61 +163,49 @@ def PreviousOrders(request,pk):
     OrderList=data.objects.filter(userid=pk)
     serializer2=ordertestSerializer(OrderList ,many=True)
     for OrderCartId in serializer1.data:
-        Cartid=OrderCartId['cart_id']
-        dict2=[]    
-        for OrderData in serializer2.data:
-            if OrderData['cart_id']==Cartid:
-                FoodId=OrderData['food_id']
-                Quantity=OrderData['quantity']
-                dict2.append({FoodId:Quantity})
-        PrevOrderList.append({Cartid:dict2})
+        x = False
+        for cart in PrevOrderList:
+            if list(cart.keys())[0] == OrderCartId['cart_id']:
+                x = True
+        if x == False:
+            Cartid=OrderCartId['cart_id']
+            dict2=[]    
+            for OrderData in serializer2.data:
+                if OrderData['cart_id']==Cartid:
+                    FoodId=OrderData['food_id']
+                    Quantity=OrderData['quantity']
+                    dict2.append({FoodId:Quantity})
+            PrevOrderList.append({Cartid:dict2})
     return Response(PrevOrderList)
 
-@api_view(['POST'])             
-def addCart(request):
-    user = (request.data).get('userid')
-    cart = (request.data).get('cart_id')
-    foodid = (request.data).get('food_ids')
-    quant = (request.data).get('quantity')
-    for i in range(len(foodid)):
-        data.objects.create(userid_id = user, cart_id = cart, food_id_id = foodid[i], quantity = quant[i])
-    return HttpResponse("cart added", status = 201) 
+@api_view(['GET'])
+def logout(request, userid, session_key):
+    current_session = session.objects.get(session_key = session_key)
+    #if current_session is None:
+    #    return HttpResponse(json.dumps({'message':'Session key not found.'}), status=404)
+    #else:
+    if current_session.userid_id == userid:
+        current_session.delete()
+        return HttpResponse(json.dumps({'message':'Successfully logged out.'}), status=200)
+    else:
+        return HttpResponse(json.dumps({'message':'Bad Request.'}), status=400)
 
 @api_view(['GET'])
-def all_category_menu(request):    
-    menulist = menu.objects.all()
-    serializer = menuSerializer(menulist, many = True)
-    catdict = dict()
-
-    for data in serializer.data:
-        if [data,] != catdict.setdefault(data['Type'], [data,]):
-            catdict[data['Type']].append(data)
+def isauth(request, session_key):
+    current_session = session.objects.get(session_key = session_key)
+    if current_session is None:
+        return HttpResponse(json.dumps({'message':'Session key not found.'}), status=404)
+    else:
+        if (timezone.now()-current_session.last_activity).total_seconds() <= 3600:
+            userid = current_session.userid
+            user = users.objects.get(userid=userid)
+            profile_info={
+                    'userid':user.userid,
+                    'name':user.name,
+                    'is_admin':user.is_admin,
+                    'mobile':user.mobile,
+                    'address':user.address
+                }
+            return HttpResponse(json.dumps(profile_info), status=200)
+        return HttpResponse(json.dumps({'message':'Session expired.'}), status=400)
     
-    return Response(catdict)
-
-
-@api_view(['POST'])
-def login(request):
-    userlist = list(users.objects.all().values())
-    data = request.data
-    p1 = data.get('userid')
-    p2 = data.get('pswd')
-    d = {
-        'userid': p1,
-        'pswd': p2
-    }
-    for user in userlist:
-        if user.get('userid') == d['userid'] and user.get('pswd') == d['pswd']:
-            dic={
-                'userid':user.get('userid'),
-                'name':user.get('name'),
-                'is_admin':user.get('is_admin')
-            }
-            return HttpResponse(json.dumps(dic), status=200)
-    return HttpResponse(json.dumps({'message':'Invalid credentials'}), status=400)
-
-@api_view(['GET'])
-def categorylist(request):
-    catlist = category.objects.all()
-    serializer = CategorySerializer(catlist, many = True)
-    return Response(serializer.data)
