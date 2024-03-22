@@ -45,7 +45,7 @@ class data(models.Model):
     food_id = models.ForeignKey(menu, on_delete=models.CASCADE)
     quantity = models.IntegerField(validators=[MinValueValidator(1),MaxValueValidator(10)])
     name = models.CharField(max_length=50)
-    mobile = models.IntegerField(validators=[MinValueValidator(10),MaxValueValidator(10)])
+    mobile = models.IntegerField(validators=[MinValueValidator(6000000000),MaxValueValidator(9999999999)])
     address = models.CharField(max_length=100)
 
     def __str__(self):

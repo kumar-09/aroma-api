@@ -82,19 +82,24 @@ def additem(request):
 @api_view(['GET'])
 def PreviousOrders(request,pk):
     PrevOrderList=[]
-    Order_Userid=data.objects.filter(userid=pk)
-    userdata_serializer=dataSerializer(Order_Userid , many=True)
-    Order_List=data.objects.filter(userid=pk)
-    userorder_serializer=ordertestSerializer(Order_List ,many=True)
-    for OrderCartId in userdata_serializer.data:
-        Cartid=OrderCartId['cart_id']
-        dict2=[]    
-        for OrderData in userorder_serializer.data:
-            if OrderData['cart_id']==Cartid:
-                FoodId=OrderData['food_id']
-                Quantity=OrderData['quantity']
-                dict2.append({FoodId:Quantity})
-        PrevOrderList.append({Cartid:dict2})
+    OrderUserid=data.objects.filter(userid=pk)
+    serializer1=dataSerializer(OrderUserid , many=True)
+    OrderList=data.objects.filter(userid=pk)
+    serializer2=ordertestSerializer(OrderList ,many=True)
+    for OrderCartId in serializer1.data:
+        x = False
+        for cart in PrevOrderList:
+            if list(cart.keys())[0] == OrderCartId['cart_id']:
+                x = True
+        if x == False:
+            Cartid=OrderCartId['cart_id']
+            dict2=[]    
+            for OrderData in serializer2.data:
+                if OrderData['cart_id']==Cartid:
+                    FoodId=OrderData['food_id']
+                    Quantity=OrderData['quantity']
+                    dict2.append({FoodId:Quantity})
+            PrevOrderList.append({Cartid:dict2})
     return Response(PrevOrderList)
 
 @api_view(['POST'])             
@@ -198,7 +203,7 @@ def categorylist(request):
 def isauth(request, session_key):
     current_session = session.objects.get(session_key = session_key)
     if current_session is None:
-        return HttpResponse(json.dumps({'message':'Session key not found.'}), status=400)
+        return HttpResponse(json.dumps({'message':'Session key not found.'}), status=404)
     else:
         if (timezone.now()-current_session.last_activity).total_seconds() <= 3600:
             userid = current_session.userid
@@ -212,3 +217,16 @@ def isauth(request, session_key):
                 }
             return HttpResponse(json.dumps(profile_info), status=200)
         return HttpResponse(json.dumps({'message':'Session expired.'}), status=400)
+    
+
+@api_view(['GET'])
+def logout(request, userid, session_key):
+    current_session = session.objects.get(session_key = session_key)
+    #if current_session is None:
+    #    return HttpResponse(json.dumps({'message':'Session key not found.'}), status=404)
+    #else:
+    if current_session.userid_id == userid:
+        current_session.delete()
+        return HttpResponse(json.dumps({'message':'Successfully logged out.'}), status=200)
+    else:
+        return HttpResponse(json.dumps({'message':'Bad Request.'}), status=400)
