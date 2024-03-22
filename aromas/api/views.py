@@ -193,7 +193,7 @@ def categorylist(request):
 def isauth(request, session_key):
     current_session = session.objects.get(session_key = session_key)
     if current_session is None:
-        return HttpResponse(json.dumps({'message':'Session key not found.'}), status=400)
+        return HttpResponse(json.dumps({'message':'Session key not found.'}), status=404)
     else:
         if (timezone.now()-current_session.last_activity).total_seconds() <= 3600:
             userid = current_session.userid
@@ -207,3 +207,16 @@ def isauth(request, session_key):
                 }
             return HttpResponse(json.dumps(profile_info), status=200)
         return HttpResponse(json.dumps({'message':'Session expired.'}), status=400)
+    
+
+@api_view(['GET'])
+def logout(request, userid, session_key):
+    current_session = session.objects.get(session_key = session_key)
+    #if current_session is None:
+    #    return HttpResponse(json.dumps({'message':'Session key not found.'}), status=404)
+    #else:
+    if current_session.userid_id == userid:
+        current_session.delete()
+        return HttpResponse(json.dumps({'message':'Successfully logged out.'}), status=200)
+    else:
+        return HttpResponse(json.dumps({'message':'Bad Request.'}), status=400)

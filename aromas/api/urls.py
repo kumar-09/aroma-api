@@ -12,5 +12,6 @@ urlpatterns = [
     path('all-category-menu/',views.all_category_menu, name='Category list'),
     path('category-list/',views.categorylist, name='Category list'),
     path('is-authenticated/<str:session_key>/',views.isauth, name='User Authentication'),
+    path('logout/<str:userid>/<str:session_key>/', views.logout, name='Logout'),
 ]
 
