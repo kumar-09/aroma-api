@@ -87,14 +87,19 @@ def PreviousOrders(request,pk):
     OrderList=data.objects.filter(userid=pk)
     serializer2=ordertestSerializer(OrderList ,many=True)
     for OrderCartId in serializer1.data:
-        Cartid=OrderCartId['cart_id']
-        dict2=[]    
-        for OrderData in serializer2.data:
-            if OrderData['cart_id']==Cartid:
-                FoodId=OrderData['food_id']
-                Quantity=OrderData['quantity']
-                dict2.append({FoodId:Quantity})
-        PrevOrderList.append({Cartid:dict2})
+        x = False
+        for cart in PrevOrderList:
+            if list(cart.keys())[0] == OrderCartId['cart_id']:
+                x = True
+        if x == False:
+            Cartid=OrderCartId['cart_id']
+            dict2=[]    
+            for OrderData in serializer2.data:
+                if OrderData['cart_id']==Cartid:
+                    FoodId=OrderData['food_id']
+                    Quantity=OrderData['quantity']
+                    dict2.append({FoodId:Quantity})
+            PrevOrderList.append({Cartid:dict2})
     return Response(PrevOrderList)
 
 @api_view(['POST'])             
