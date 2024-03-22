@@ -17,7 +17,6 @@ def register(request):
         'userid':request.data.get('userid'),
         'name':request.data.get('name'),
         'pswd':request.data.get('pswd'),
-        'is_admin':request.data.get('is_admin'),
         'mobile':request.data.get('mobile'),
         'address':request.data.get('address'),
     }
@@ -34,8 +33,9 @@ def register(request):
         sessionserializer=sessionSerializer(data=session_data)
         if sessionserializer.is_valid():
             sessionserializer.save()
+            registered_data['session_key']=key
         return HttpResponse(json.dumps(registered_data),status = 201)
-    return HttpResponse(json.dumps({'message':'Invalid credentials'}),status = 400)
+    return HttpResponse(json.dumps({'message':'User Already Exist'}),status = 400)
 
 @api_view(['GET'])
 def getmenu(request):
@@ -147,15 +147,25 @@ def login(request):
                 'session_key':key,
             }
             current_session = session.objects.filter(userid_id=d['userid']).first()
-            if (timezone.now()-current_session.last_activity).total_seconds() >= 3600:
-
-                current_session.last_activity=timezone.now() #to change the value of last_activty
+            if current_session is None:
                 sessionserializer=sessionSerializer(data=session_data)
                 if sessionserializer.is_valid():
                     sessionserializer.save()
-                    return HttpResponse(json.dumps(dic), status=200)
-            else:
-                return HttpResponse('Already active',status=201)
+                    dic['session_key']=key
+                    return HttpResponse(json.dumps(dic), status=200)                    
+
+            else:    
+                if (timezone.now()-current_session.last_activity).total_seconds() > 3600:
+
+                    current_session.last_activity=timezone.now() #to change the value of last_activty
+                    sessionserializer=sessionSerializer(data=session_data)
+                    if sessionserializer.is_valid():
+                        sessionserializer.save()
+                        dic['session_key']=key
+                        return HttpResponse(json.dumps(dic), status=200)
+                else:
+                    dic['session_key']=current_session.session_key
+                    return HttpResponse(json.dumps(dic),status=200)
                     
     return HttpResponse(json.dumps({'message':'Invalid credentials'}), status=400)
 
