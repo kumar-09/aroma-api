@@ -82,14 +82,14 @@ def additem(request):
 @api_view(['GET'])
 def PreviousOrders(request,pk):
     PrevOrderList=[]
-    OrderUserid=data.objects.filter(userid=pk)
-    serializer1=dataSerializer(OrderUserid , many=True)
-    OrderList=data.objects.filter(userid=pk)
-    serializer2=ordertestSerializer(OrderList ,many=True)
-    for OrderCartId in serializer1.data:
+    Order_Userid=data.objects.filter(userid=pk)
+    userdata_serializer=dataSerializer(Order_Userid , many=True)
+    Order_List=data.objects.filter(userid=pk)
+    userorder_serializer=ordertestSerializer(Order_List ,many=True)
+    for OrderCartId in userdata_serializer.data:
         Cartid=OrderCartId['cart_id']
         dict2=[]    
-        for OrderData in serializer2.data:
+        for OrderData in userorder_serializer.data:
             if OrderData['cart_id']==Cartid:
                 FoodId=OrderData['food_id']
                 Quantity=OrderData['quantity']
